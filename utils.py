@@ -1,0 +1,43 @@
+import torch
+import torchvision as tv
+
+
+def mnist_dataloaders(mnist_path, batch_size=128, use_cuda=True):
+    '''Returns a train and test dataloader for mnist dataset'''
+    download = True
+    trans = tv.transforms.ToTensor()
+    train_set = tv.datasets.MNIST(root=mnist_path, train=True, transform=trans,
+                                  download=download)
+    test_set = tv.datasets.MNIST(root=mnist_path, train=False, transform=trans)
+
+    kwargs = {'num_workers': 1, 'pin_memory': use_cuda}
+
+    train_loader = torch.utils.data.DataLoader(
+        dataset=train_set, batch_size=batch_size, shuffle=True, **kwargs
+    )
+
+    test_loader = torch.utils.data.DataLoader(
+        dataset=test_set, batch_size=batch_size, shuffle=False, **kwargs)
+
+    return train_loader, test_loader
+
+
+def one_hot(vec, n_classes):
+    '''
+    Converts a vector in target indices to a matrix of 1 hots
+    args: 
+        vec is a tensor
+        n_classes is the number of classes in the one hot matrix
+    '''
+    v = torch.zeros(vec.shape[0], n_classes)
+    for i, j in enumerate(vec):
+        v[i, int(j)] = 1.
+    return v
+
+
+def categorical_accuracy(y_true, y_pred):
+    y_pred = torch.max(y_pred, -1)
+    y_pred = y_pred[1].float()
+    return torch.mean(
+        torch.eq(y_pred, y_true).float()
+    )
