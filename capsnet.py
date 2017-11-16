@@ -4,6 +4,7 @@ from torch.autograd import Variable
 
 from capsule_layer import CapsuleLayer
 from convrelu import Conv2dRelu
+from routingcaps import CapsuleRouting
 
 
 class CapsNet(nn.Module):

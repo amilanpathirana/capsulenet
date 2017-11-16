@@ -75,8 +75,7 @@ model = CapsNet(n_conv_channel=256,
                 n_primary_caps=8,
                 primary_cap_size=1152,
                 output_unit_size=16,
-                n_routing_caps=3,
-                use_gpu=USE_GPU)
+                n_routing_caps=3)
 
 model = model.cuda() if USE_GPU else model
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
