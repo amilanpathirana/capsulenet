@@ -80,4 +80,4 @@ class CapsNet(nn.Module):
         '''
         # ||D|| where D is the digit caps
         return F.softmax(torch.sum(final_caps**2,
-                                   dim=2, keepdim=True)).view(10)
+                                   dim=2, keepdim=True)).view(-1, 10)

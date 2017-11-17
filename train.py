@@ -9,7 +9,7 @@ from capsnet import CapsNet
 BATCH_SIZE = 128
 USE_GPU = True
 N_CLASSES = 10
-LOG_INTERVAL = 10
+LOG_INTERVAL = 100
 EPOCHS = 10
 
 
@@ -17,7 +17,7 @@ def train(epoch, model, dataloader, optim):
     model.train()
 
     for ix, (X, y) in enumerate(dataloader):
-        target = utils.one_hot(y, model.routing_caps.n_unit)
+        target = utils.one_hot(y, model.final_caps.n_unit)
 
         X, target = Variable(X), Variable(target)
         if USE_GPU:
@@ -46,7 +46,7 @@ def test(epoch, model, dataloader):
     model.eval()
     loss_total = 0.
     for i, (X, y) in enumerate(dataloader):
-        target = utils.one_hot(y, model.routing_caps.n_unit)
+        target = utils.one_hot(y, model.final_caps.n_unit)
 
         X, target = Variable(X), Variable(target)
         if USE_GPU:
@@ -56,16 +56,17 @@ def test(epoch, model, dataloader):
         loss = model.loss(y_hat, target)
         loss_total += loss.data[0]
 
-    # acc = utils.categorical_accuracy(y.float(), y_hat.cpu().data)
+        preds = model.capsule_prediction(y_hat)
+        acc = utils.categorical_accuracy(y.float(), preds.cpu().data)
 
-    print('[EVAL Epoch {}] ({}/{} {:.0f}%) Loss: {} Accuracy: {}'.format(
-        epoch,
-        epoch * len(X),
-        len(dataloader.dataset),
-        100. * i / len(dataloader),
-        loss_total / len(dataloader),
-        '-'  # acc
-    ))
+        print('[EVAL Epoch {}] ({}/{} {:.0f}%) Loss: {} Accuracy: {}'.format(
+            epoch,
+            epoch * len(X),
+            len(dataloader.dataset),
+            100. * i / len(dataloader),
+            loss_total / len(dataloader),
+            acc
+        ))
 
 
 trainloader, testloader = utils.mnist_dataloaders(
