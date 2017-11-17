@@ -4,18 +4,13 @@ from torch.autograd import Variable
 
 from capsule_layer import CapsuleLayer
 from convrelu import Conv2dRelu
-from routingcaps import CapsuleRouting
 
 
 class CapsNet(nn.Module):
     def __init__(self, n_conv_channel, n_primary_caps, primary_cap_size,
-                 output_unit_size, n_routing_caps, use_gpu):
+                 output_unit_size, n_routing_caps):
 
         super(CapsNet, self).__init__()
-
-        self.use_gpu = use_gpu
-        if use_gpu:
-            self.cuda()
 
         self.conv1 = Conv2dRelu(1, n_conv_channel, 9)
 
@@ -24,16 +19,14 @@ class CapsNet(nn.Module):
                                     n_primary_caps,
                                     primary_cap_size,
                                     False,
-                                    n_routing_caps,
-                                    use_gpu)
+                                    n_routing_caps)
 
         self.routing_caps = CapsuleLayer(n_primary_caps,
                                          primary_cap_size,
                                          10,  # 10 catagories in MNIST
                                          output_unit_size,
                                          True,
-                                         n_routing_caps,
-                                         use_gpu)
+                                         n_routing_caps)
 
     def forward(self, X):
         X = self.conv1(X)
@@ -58,8 +51,7 @@ class CapsNet(nn.Module):
 
         # Calculate left and right max() terms.
         zero = Variable(torch.zeros(1))
-        if self.use_gpu:
-            zero = zero.cuda()
+        zero = zero.cuda() if input.is_cuda else zero
         m_plus = 0.9
         m_minus = 0.1
         loss_lambda = 0.5

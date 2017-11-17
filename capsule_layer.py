@@ -85,18 +85,18 @@ class CapsuleLayer(nn.Module):
         # Precedure 1 line 3
         for i in range(self.n_routing_iters):
             # Precedure 1 line 4 c_i <- softmax(b_i)
-            c_i = F.softmax(b_ij)
-            c_i = torch.cat([c_i] * batch_size).unsqueeze(4)
+            c_ij = F.softmax(b_ij)
+            c_ij = torch.cat([c_ij] * batch_size).unsqueeze(4)
 
             # Precedure 1 line 5 s_j <- sum_i( c_ij * u_j|i )
-            s_j = (c_i * u_hat).sum(dim=1, keepdim=True)
+            s_j = (c_ij * u_hat).sum(dim=1, keepdim=True)
 
             # Precedure 1 line 6 squash using eq.1
             v_j = self.squash(s_j)
-            v_j = torch.cat([v_j] * self.in_channels, dim=1)
+            v_j1 = torch.cat([v_j] * self.in_channels, dim=1)
 
             # Precedure 1 line 7 u_j|i * v_j
-            uv_j = torch.matmul(u_hat.transpose(3, 4), v_j)
+            uv_j = torch.matmul(u_hat.transpose(3, 4), v_j1)
             uv_j = uv_j.squeeze(4).mean(dim=0, keepdim=True)
 
             # Precedure 1 line 7 b_ij <- b_ij + u_j|i * v_j
