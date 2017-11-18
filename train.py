@@ -1,4 +1,3 @@
-import torchvision as tv
 from torch.autograd import Variable
 import torch
 import time
@@ -49,7 +48,7 @@ def train(epoch, model, dataloader, optim):
 
 def test(epoch, model, dataloader):
     model.eval()
-    loss_total = 0.
+
     for i, (X, y) in enumerate(dataloader):
         target = utils.one_hot(y, model.final_caps.n_unit)
 
@@ -59,7 +58,6 @@ def test(epoch, model, dataloader):
 
         y_hat = model(X)
         loss = model.loss(y_hat, target)
-        loss_total += loss.data[0]
 
         preds = model.capsule_prediction(y_hat)
         acc = utils.categorical_accuracy(y.float(), preds.cpu().data)

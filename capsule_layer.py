@@ -14,8 +14,8 @@ class CapsuleLayer(nn.Module):
         in_channels (int): number of channels on the tensor fed into capsule
         n_units (int): number of capsule units
         unit_size (int): size of each capsule
-        use_routing (bool): if this layer is preceeded by a layer of capsules, use routing
-        n_routing_iters (int): if using routing, how many iters to run the routing algorithm
+        use_routing (bool): if layer is preceeded by layer of caps, use routing
+        n_routing_iters (int): if routing, how many iters to apply routing alg
         '''
         super(CapsuleLayer, self).__init__()
 

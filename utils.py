@@ -25,7 +25,7 @@ def mnist_dataloaders(mnist_path, batch_size=128, use_cuda=True):
 def one_hot(vec, n_classes):
     '''
     Converts a vector in target indices to a matrix of 1 hots
-    args: 
+    args:
         vec is a tensor
         n_classes is the number of classes in the one hot matrix
     '''
