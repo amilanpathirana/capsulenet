@@ -1,20 +1,24 @@
 import torchvision as tv
 from torch.autograd import Variable
 import torch
+import time
+from os import path
 
 from args import args
 import utils
+from log import Logger
 from capsnet import CapsNet
 
-
-print('Training CapsNet with the following settings:\n{}'.format(args))
-
 # Constants
+logger = Logger(args.batch_size, args.visdom)
+logger.plain('Training CapsNet with the following settings:\n{}'.format(args))
+
 if args.dataset == 'MNIST':
     N_CLASSES = 10
 else:
     raise Exception('Invalid dataset')
-EPOCHS = 10
+
+start = time.strftime("%Y-%m-%d-%H:%M")
 
 
 def train(epoch, model, dataloader, optim):
@@ -34,14 +38,11 @@ def train(epoch, model, dataloader, optim):
         optim.zero_grad()
 
         if ix % args.log_interval == 0:
+            preds = model.capsule_prediction(y_hat)
+            acc = utils.categorical_accuracy(y.float(), preds.cpu().data)
             # acc = utils.categorical_accuracy(y.float(), y_hat.cpu().data)
-            print('[Epoch {}] ({}/{} {:.0f}%)\tLoss: {}'.format(
-                epoch,
-                ix * len(X),
-                len(dataloader.dataset),
-                100. * ix / len(dataloader),
-                loss.data[0]
-            ))
+            logger.log(epoch, ix, len(dataloader.dataset), start+'_TRAIN',
+                       loss=loss.data[0], acc=acc)
 
     return loss.data[0]
 
@@ -62,15 +63,8 @@ def test(epoch, model, dataloader):
 
         preds = model.capsule_prediction(y_hat)
         acc = utils.categorical_accuracy(y.float(), preds.cpu().data)
-
-        print('[EVAL Epoch {}] ({}/{} {:.0f}%) Loss: {} Accuracy: {}'.format(
-            epoch,
-            epoch * len(X),
-            len(dataloader.dataset),
-            100. * i / len(dataloader),
-            loss_total / len(dataloader),
-            acc
-        ))
+        logger.log(epoch, i, len(dataloader.dataset), start+'_TEST',
+                   loss=loss.data[0], acc=acc)
 
 
 trainloader, testloader = utils.mnist_dataloaders(args.data_path,
@@ -81,13 +75,21 @@ model = CapsNet(n_conv_channel=256,
                 n_primary_caps=8,
                 primary_cap_size=1152,
                 output_unit_size=16,
-                n_routing_caps=3)
+                n_routing_iter=3)
+
+if args.load_checkpoint != '':
+    model.load_state_dict(torch.load(args.load_checkpoint))
 
 model = model.cuda() if args.use_gpu else model
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
-print('Trainloader:', len(trainloader), len(trainloader.dataset))
+optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
 for epoch in range(1, args.epochs+1):
     train(epoch, model, trainloader, optimizer)
     test(epoch, model, testloader)
+
+    if args.checkpoint_interval > 0:
+        if epoch % args.checkpoint_interval == 0:
+            p = path.join(args.checkpoint_dir,
+                          'capsnet_{}_{}.pth'.format(start, epoch))
+            torch.save(model.state_dict(),
+                       p)

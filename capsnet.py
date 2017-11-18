@@ -9,7 +9,7 @@ from convrelu import Conv2dRelu
 
 class CapsNet(nn.Module):
     def __init__(self, n_conv_channel, n_primary_caps, primary_cap_size,
-                 output_unit_size, n_routing_caps):
+                 output_unit_size, n_routing_iter):
 
         super(CapsNet, self).__init__()
 
@@ -20,14 +20,14 @@ class CapsNet(nn.Module):
                                     n_primary_caps,
                                     primary_cap_size,
                                     False,
-                                    n_routing_caps)
+                                    n_routing_iter)
 
         self.final_caps = CapsuleLayer(n_primary_caps,
                                        primary_cap_size,
                                        10,  # 10 catagories in MNIST
                                        output_unit_size,
                                        True,
-                                       n_routing_caps)
+                                       n_routing_iter)
 
     def forward(self, X):
         X = self.conv1(X)
