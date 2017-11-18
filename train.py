@@ -2,14 +2,18 @@ import torchvision as tv
 from torch.autograd import Variable
 import torch
 
+from args import args
 import utils
 from capsnet import CapsNet
 
+
+print('Training CapsNet with the following settings:\n{}'.format(args))
+
 # Constants
-BATCH_SIZE = 128
-USE_GPU = True
-N_CLASSES = 10
-LOG_INTERVAL = 100
+if args.dataset == 'MNIST':
+    N_CLASSES = 10
+else:
+    raise Exception('Invalid dataset')
 EPOCHS = 10
 
 
@@ -20,7 +24,7 @@ def train(epoch, model, dataloader, optim):
         target = utils.one_hot(y, model.final_caps.n_unit)
 
         X, target = Variable(X), Variable(target)
-        if USE_GPU:
+        if args.use_gpu:
             X, target = X.cuda(), target.cuda()
 
         y_hat = model(X)
@@ -29,7 +33,7 @@ def train(epoch, model, dataloader, optim):
         optim.step()
         optim.zero_grad()
 
-        if ix % LOG_INTERVAL == 0:
+        if ix % args.log_interval == 0:
             # acc = utils.categorical_accuracy(y.float(), y_hat.cpu().data)
             print('[Epoch {}] ({}/{} {:.0f}%)\tLoss: {}'.format(
                 epoch,
@@ -49,7 +53,7 @@ def test(epoch, model, dataloader):
         target = utils.one_hot(y, model.final_caps.n_unit)
 
         X, target = Variable(X), Variable(target)
-        if USE_GPU:
+        if args.use_gpu:
             X, target = X.cuda(), target.cuda()
 
         y_hat = model(X)
@@ -69,8 +73,9 @@ def test(epoch, model, dataloader):
         ))
 
 
-trainloader, testloader = utils.mnist_dataloaders(
-    '/home/erikreppel/data/mnist', BATCH_SIZE, USE_GPU)
+trainloader, testloader = utils.mnist_dataloaders(args.data_path,
+                                                  args.batch_size,
+                                                  args.use_gpu)
 
 model = CapsNet(n_conv_channel=256,
                 n_primary_caps=8,
@@ -78,11 +83,11 @@ model = CapsNet(n_conv_channel=256,
                 output_unit_size=16,
                 n_routing_caps=3)
 
-model = model.cuda() if USE_GPU else model
+model = model.cuda() if args.use_gpu else model
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 print('Trainloader:', len(trainloader), len(trainloader.dataset))
 
-for epoch in range(1, EPOCHS+1):
+for epoch in range(1, args.epochs+1):
     train(epoch, model, trainloader, optimizer)
     test(epoch, model, testloader)

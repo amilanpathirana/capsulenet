@@ -41,3 +41,14 @@ def categorical_accuracy(y_true, y_pred):
     return torch.mean(
         torch.eq(y_pred, y_true).float()
     )
+
+
+model_configs = {
+    'MNIST': {
+        'n_conv_channel': 256,
+        'n_primary_caps': 8,
+        'primary_cap_size': 1152,
+        'output_unit_size': 16,
+        'n_routing_caps': 3
+    }
+}
