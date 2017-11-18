@@ -4,8 +4,13 @@ A PyTorch implementation of CapsuleNet as described in ["Dynamic Routing Between
 
 ## Results
 
+| Dataset       | Test loss | Test accuracy |
+| ------------- |---------- | ------------- |
+| MNIST         | 0.04356   | 98.803        |
+| Fashion MNIST | 0.19429   | 86.580        |
+
 Using:
- 8 capsules in the first capsule layer, 10 capsules in the second
+
 ```
 Conv layer:
 - input channels: 1
