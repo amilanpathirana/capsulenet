@@ -1,6 +1,8 @@
 from torch.autograd import Variable
 import torch
 import torch.nn as nn
+from torch.optim import lr_scheduler
+
 import time
 from os import path
 
@@ -53,7 +55,7 @@ def train(epoch, model, dataloader, optim, decoder, decoder_optim):
                        loss=loss.data[0], acc=acc,
                        decoder_loss=decoder_loss.data[0])
 
-            logger.images(imgs.data.cpu())
+            logger.images('generated_fmnist', imgs.data.cpu())
 
     return loss.data[0]
 
@@ -98,11 +100,16 @@ optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 # setup decoder for training
 decoder = Decoder()
 decoder = decoder.cuda() if args.use_gpu else decoder
-decoder_optim = torch.optim.Adam(decoder.parameters(), lr=0.0001)
+decoder_optim = torch.optim.Adam(decoder.parameters(), lr=0.001)
+# use decaying learning rate
+scheduler = lr_scheduler.ExponentialLR(decoder_optim, 0.5)
+
 
 for epoch in range(1, args.epochs+1):
     train(epoch, model, trainloader, optimizer, decoder, decoder_optim)
     test(epoch, model, testloader)
+
+    scheduler.step()
 
     if args.checkpoint_interval > 0:
         if epoch % args.checkpoint_interval == 0:
