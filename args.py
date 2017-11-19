@@ -28,6 +28,9 @@ parser.add_argument('--checkpoint_interval', type=int, default=0,
                     help='path to load a previously trained model from')
 
 parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints',
-                    help='path to load a previously trained model from')
+                    help='dir to store checkpoints in')
+
+parser.add_argument('--gen_dir', type=str, default='./generated',
+                    help='folder to store generated images in')
 
 args = parser.parse_args()

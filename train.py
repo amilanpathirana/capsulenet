@@ -1,12 +1,13 @@
 from torch.autograd import Variable
 import torch
+import torch.nn as nn
 import time
 from os import path
 
 from args import args
 import utils
 from log import Logger
-from capsnet import CapsNet
+from capsnet import CapsNet, Decoder
 
 # Constants
 logger = Logger(args.batch_size, args.visdom)
@@ -20,8 +21,10 @@ else:
 start = time.strftime("%Y-%m-%d-%H:%M")
 
 
-def train(epoch, model, dataloader, optim):
+def train(epoch, model, dataloader, optim, decoder, decoder_optim):
     model.train()
+
+    decoder_criterion = nn.MSELoss()
 
     for ix, (X, y) in enumerate(dataloader):
         target = utils.one_hot(y, model.final_caps.n_unit)
@@ -36,12 +39,21 @@ def train(epoch, model, dataloader, optim):
         optim.step()
         optim.zero_grad()
 
+        # train the decoder
+        imgs = decoder(y_hat.detach())
+        decoder_loss = decoder_criterion(imgs, X)
+        decoder_loss.backward()
+        decoder_optim.step()
+        decoder_optim.zero_grad()
+
         if ix % args.log_interval == 0:
             preds = model.capsule_prediction(y_hat)
             acc = utils.categorical_accuracy(y.float(), preds.cpu().data)
-            # acc = utils.categorical_accuracy(y.float(), y_hat.cpu().data)
             logger.log(epoch, ix, len(dataloader.dataset), start+'_TRAIN',
-                       loss=loss.data[0], acc=acc)
+                       loss=loss.data[0], acc=acc,
+                       decoder_loss=decoder_loss.data[0])
+
+            logger.images(imgs.data.cpu())
 
     return loss.data[0]
 
@@ -75,14 +87,21 @@ model = CapsNet(n_conv_channel=256,
                 output_unit_size=16,
                 n_routing_iter=3)
 
+# load state from past runs
 if args.load_checkpoint != '':
     model.load_state_dict(torch.load(args.load_checkpoint))
 
+# move to GPU
 model = model.cuda() if args.use_gpu else model
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
+# setup decoder for training
+decoder = Decoder()
+decoder = decoder.cuda() if args.use_gpu else decoder
+decoder_optim = torch.optim.Adam(decoder.parameters(), lr=0.0001)
+
 for epoch in range(1, args.epochs+1):
-    train(epoch, model, trainloader, optimizer)
+    train(epoch, model, trainloader, optimizer, decoder, decoder_optim)
     test(epoch, model, testloader)
 
     if args.checkpoint_interval > 0:
@@ -90,4 +109,9 @@ for epoch in range(1, args.epochs+1):
             p = path.join(args.checkpoint_dir,
                           'capsnet_{}_{}.pth'.format(start, epoch))
             torch.save(model.state_dict(),
+                       p)
+
+            p = path.join(args.checkpoint_dir,
+                          'decoder_{}_{}.pth'.format(start, epoch))
+            torch.save(decoder.state_dict(),
                        p)

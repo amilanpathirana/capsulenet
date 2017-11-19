@@ -81,3 +81,19 @@ class CapsNet(nn.Module):
         # ||D|| where D is the digit caps
         return F.softmax(torch.sum(final_caps**2,
                                    dim=2, keepdim=True)).view(-1, 10)
+
+
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+        self.l1 = nn.Linear(160, 512)
+        self.l2 = nn.Linear(512, 1024)
+        self.l3 = nn.Linear(1024, 784)
+
+    def forward(self, X):
+        X = X.view(-1, 160)
+        X = F.relu(self.l1(X))
+        X = F.relu(self.l2(X))
+        X = F.sigmoid(self.l3(X))
+        X = X.view(-1, 1, 28, 28)
+        return X
