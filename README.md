@@ -2,6 +2,8 @@
 
 A PyTorch implementation of CapsuleNet as described in ["Dynamic Routing Between Capsules"](https://arxiv.org/abs/1710.09829) by Hinton et al.
 
+Includes decoder and pretrained weights for MNIST and Fashion MNIST in `checkpoints/`.
+
 ## Instructions
 
 This project uses conda for package management, install miniconda3 [here](https://conda.io/miniconda.html).
