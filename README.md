@@ -2,7 +2,7 @@
 
 A PyTorch implementation of CapsuleNet as described in ["Dynamic Routing Between Capsules"](https://arxiv.org/abs/1710.09829) by Hinton et al.
 
-## Run
+## Instructions
 
 ```
 ▶ python train.py --help
@@ -41,6 +41,15 @@ optional arguments:
 python train.py --visdom --checkpoint_interval=1 --epochs=10
 ```
 
+### To run using Fashion mnist
+
+Download the dataset from [here](https://github.com/zalandoresearch/fashion-mnist), place them in a folder and run with
+
+```
+python train.py --data_path=<path to download> ...
+```
+
+The PyTorch mnist dataset class will handle pre-processing.
 
 ## Results
 
@@ -49,6 +58,7 @@ python train.py --visdom --checkpoint_interval=1 --epochs=10
 | MNIST         | 10     | 0.04356   | 98.803        |
 | Fashion MNIST | 10     | 0.19429   | 86.580        |
 | MNIST         | 50     | 0.03029   | 99.011        |
+| Fashion MNIST | 50     | 0.16416   | 88.904        |
 
 
 Using:
@@ -75,16 +85,18 @@ Capsule layer 2:
 
 I have yet to be able to reproduce the sharpness of reproduced images from the paper,
 I suspect it the reason is because I am decoupling the digit cap results from so
-that loss from the image generation is not backproped into capsnet. Another possibility
-is that I need to use a decaying learning rate like in the paper.
+that loss from the image generation is not backproped into capsnet. 
 
-Results of the decoder:
+####  Results of the decoder:
 
 ![batch](./imgs/mnist_generated_50_epoch.png)
+![batch](./imgs/fmnist_generated_50_epoch.png)
 
 Comparison of original and generated:
 
 ![compare](./imgs/generated_compare.png)
+
+## Training Graphs
 
 Results of training for 10 epochs on MNIST:
 
