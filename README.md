@@ -43,11 +43,30 @@ python train.py --visdom --checkpoint_interval=1 --epochs=10
 
 ### To run using Fashion mnist
 
-Download the dataset from [here](https://github.com/zalandoresearch/fashion-mnist), place them in a folder and run with
+Download the dataset from [here](https://github.com/zalandoresearch/fashion-mnist), place them in a subdirectory of folder entitled raw and run with
 
 ```
 python train.py --data_path=<path to download> ...
 ```
+
+your fashion-mnist folder should look like this
+
+```
+▶ tree ~/data/fashion-mnist
+/home/erikreppel/data/fashion-mnist
+├── processed
+│   ├── test.pt
+│   └── training.pt
+└── raw
+    ├── t10k-images-idx3-ubyte
+    ├── t10k-labels-idx1-ubyte
+    ├── train-images-idx3-ubyte
+    └── train-labels-idx1-ubyte
+
+2 directories, 6 files
+
+```
+The `processed` folder is created after training starts.
 
 The PyTorch mnist dataset class will handle pre-processing.
 
