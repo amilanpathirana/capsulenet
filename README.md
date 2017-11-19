@@ -4,6 +4,22 @@ A PyTorch implementation of CapsuleNet as described in ["Dynamic Routing Between
 
 ## Instructions
 
+This project uses conda for package management, install miniconda3 [here](https://conda.io/miniconda.html).
+
+Create an environment with all the dependancies:
+
+```
+conda env create -f environment.yml
+```
+
+Activate with
+
+```
+source activate capsnet
+```
+
+To train:
+
 ```
 ▶ python train.py --help
 usage: CapsNet [-h] [--epochs EPOCHS] [--data_path DATA_PATH]
