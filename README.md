@@ -59,6 +59,18 @@ optional arguments:
 python train.py --visdom --checkpoint_interval=1 --epochs=10
 ```
 
+### Visdom for graphing progress
+
+To start the visdom server:
+
+```
+python -m visdom.server
+# Now running on http://localhost:8097/
+```
+
+Then run with the `--visdom` flag
+
+
 ### To run using Fashion mnist
 
 Download the dataset from [here](https://github.com/zalandoresearch/fashion-mnist), place them in a subdirectory of folder entitled raw and run with
